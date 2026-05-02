@@ -29,6 +29,20 @@ if [[ -n "${DOTFILES_REMOTE:-}" && ! -d "$HOME/.dotfiles" ]]; then
   git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" config status.showUntrackedFiles no
 fi
 
+# ── macOS: symlink Library/Application Support/nushell → .config/nushell ─────
+# Nushell on macOS defaults to ~/Library/Application Support/nushell. Point it
+# at the portable ~/.config/nushell location so the same files work on Linux.
+if [[ "$(uname -s)" == "Darwin" && -d "$HOME/.config/nushell" ]]; then
+  NU_LIB="$HOME/Library/Application Support/nushell"
+  mkdir -p "$NU_LIB"
+  for f in env.nu config.nu; do
+    if [[ -e "$HOME/.config/nushell/$f" && ! -L "$NU_LIB/$f" ]]; then
+      rm -f "$NU_LIB/$f"
+      ln -s "$HOME/.config/nushell/$f" "$NU_LIB/$f"
+    fi
+  done
+fi
+
 # ── Brewfile ─────────────────────────────────────────────────────────────────
 log "Installing Brew packages"
 brew bundle install --file="$HOME/Brewfile"
