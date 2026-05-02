@@ -45,7 +45,7 @@ fi
 
 # ── Brewfile ─────────────────────────────────────────────────────────────────
 log "Installing Brew packages"
-brew bundle install --file="$HOME/Brewfile"
+brew bundle install --file="$HOME/.config/dotfiles/Brewfile"
 
 # ── Rust ─────────────────────────────────────────────────────────────────────
 if ! command -v rustup >/dev/null 2>&1; then

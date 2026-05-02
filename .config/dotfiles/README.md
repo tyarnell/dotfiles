@@ -9,7 +9,8 @@ Personal config tracked as a [bare git repo](https://www.atlassian.com/git/tutor
 | `.config/nushell/{env,config}.nu` | shell config |
 | `.config/helix/{config,languages,external-snippets}.toml` | editor + LSP wiring |
 | `.config/helix/snippets/` | hand-curated snippets |
-| `Brewfile` | brew formulae + casks |
+| `.config/dotfiles/Brewfile` | brew formulae + casks |
+| `.config/dotfiles/README.md` | this file |
 | `bin/bootstrap` | one-shot installer for a new Mac |
 
 ## Daily use
