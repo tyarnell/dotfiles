@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+# Bootstrap a fresh macOS box: brew + Brewfile, rustup, go bins, nushell as login shell.
+# Usage:  bash ~/bin/bootstrap
+#         DOTFILES_REMOTE=git@github.com:you/dotfiles.git bash ~/bin/bootstrap   # also clones dotfiles
+
+set -euo pipefail
+
+log() { printf '\n\033[1;34m>> %s\033[0m\n' "$*"; }
+
+# ── Xcode CLT ────────────────────────────────────────────────────────────────
+if ! xcode-select -p >/dev/null 2>&1; then
+  log "Installing Xcode Command Line Tools (accept the dialog, then re-run)"
+  xcode-select --install
+  exit 0
+fi
+
+# ── Homebrew ─────────────────────────────────────────────────────────────────
+if ! command -v brew >/dev/null 2>&1; then
+  log "Installing Homebrew"
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+fi
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
+# ── Dotfiles (bare repo) ─────────────────────────────────────────────────────
+if [[ -n "${DOTFILES_REMOTE:-}" && ! -d "$HOME/.dotfiles" ]]; then
+  log "Cloning dotfiles from $DOTFILES_REMOTE"
+  git clone --bare "$DOTFILES_REMOTE" "$HOME/.dotfiles"
+  git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" checkout
+  git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" config status.showUntrackedFiles no
+fi
+
+# ── Brewfile ─────────────────────────────────────────────────────────────────
+log "Installing Brew packages"
+brew bundle install --file="$HOME/Brewfile"
+
+# ── Rust ─────────────────────────────────────────────────────────────────────
+if ! command -v rustup >/dev/null 2>&1; then
+  log "Installing rustup"
+  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path
+fi
+export PATH="$HOME/.cargo/bin:$PATH"
+
+log "Adding Rust components"
+rustup component add rust-analyzer rustfmt clippy
+
+log "Installing cargo bins"
+cargo install simple-completion-language-server
+
+# ── Go ───────────────────────────────────────────────────────────────────────
+export GOPATH="$HOME/go"
+export PATH="$GOPATH/bin:$PATH"
+
+log "Installing Go bins"
+go install golang.org/x/tools/gopls@latest
+go install github.com/go-delve/delve/cmd/dlv@latest
+go install golang.org/x/tools/cmd/goimports@latest
+go install github.com/cweill/gotests/gotests@latest
+go install honnef.co/go/tools/cmd/staticcheck@latest
+
+# ── Login shell ──────────────────────────────────────────────────────────────
+NU="$(command -v nu)"
+if ! grep -qx "$NU" /etc/shells; then
+  log "Adding nu to /etc/shells (requires sudo)"
+  echo "$NU" | sudo tee -a /etc/shells >/dev/null
+fi
+if [[ "${SHELL:-}" != "$NU" ]]; then
+  log "To set nushell as login shell, run:  chsh -s $NU"
+fi
+
+log "Done. Open a new terminal."

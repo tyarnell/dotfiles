@@ -1,0 +1,92 @@
+# Language Server Configuration
+# ~/.config/helix/languages.toml
+
+# ── gopls (Go) ────────────────────────────────────────────────────────────────
+[language-server.gopls]
+command = "gopls"
+
+[language-server.gopls.config.gopls]
+staticcheck = true
+usePlaceholders = true
+
+[language-server.gopls.config.gopls.analyses]
+unusedparams = true
+shadow = true
+
+[language-server.gopls.config.gopls.hints]
+assignVariableTypes    = true
+compositeLiteralFields = true
+compositeLiteralTypes  = true
+constantValues         = true
+functionTypeParameters = true
+parameterNames         = true
+rangeVariableTypes     = true
+
+# ── scls (snippets + word completion) ────────────────────────────────────────
+[language-server.scls]
+command = "simple-completion-language-server"
+
+[language-server.scls.config]
+feature_words    = false
+feature_snippets = true
+snippets_first   = true
+
+# ── marksman (Markdown) ──────────────────────────────────────────────────────
+[language-server.marksman]
+command = "marksman"
+args    = ["server"]
+
+# ── taplo (TOML) ──────────────────────────────────────────────────────────────
+[language-server.taplo]
+command = "taplo"
+args    = ["lsp", "stdio"]
+
+# ── yaml-language-server ─────────────────────────────────────────────────────
+[language-server.yaml-language-server]
+command = "yaml-language-server"
+args    = ["--stdio"]
+
+[language-server.yaml-language-server.config.yaml]
+format    = { enable = true }
+hover     = true
+completion = true
+validate  = true
+schemaStore = { enable = true, url = "https://www.schemastore.org/api/json/catalog.json" }
+
+# ── bash-language-server ─────────────────────────────────────────────────────
+[language-server.bash-language-server]
+command = "bash-language-server"
+args    = ["start"]
+
+# ── Per-language wiring ──────────────────────────────────────────────────────
+
+[[language]]
+name             = "go"
+language-servers = ["gopls", "scls"]
+formatter        = { command = "goimports" }
+auto-format      = true
+
+[[language]]
+name             = "markdown"
+language-servers = ["marksman", "scls"]
+soft-wrap        = { enable = true }
+
+[[language]]
+name             = "toml"
+language-servers = ["taplo"]
+auto-format      = true
+formatter        = { command = "taplo", args = ["format", "-"] }
+
+[[language]]
+name             = "yaml"
+language-servers = ["yaml-language-server"]
+
+[[language]]
+name             = "bash"
+language-servers = ["bash-language-server"]
+formatter        = { command = "shfmt", args = ["-i", "2", "-ci"] }
+
+[[language]]
+name             = "json"
+language-servers = ["taplo"]
+formatter        = { command = "taplo", args = ["format", "-f", "json", "-"] }
