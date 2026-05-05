@@ -27,9 +27,10 @@ dot push
 ## New machine
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/tyarnell/dotfiles/main/bin/bootstrap -o /tmp/bootstrap
-DOTFILES_REMOTE=git@github.com:tyarnell/dotfiles.git bash /tmp/bootstrap
+curl -fsSL https://raw.githubusercontent.com/tyarnell/dotfiles/main/bin/bootstrap | bash
 ```
+
+Defaults to cloning `https://github.com/tyarnell/dotfiles.git` (HTTPS so a brand-new box without SSH keys works). Override for forks: `DOTFILES_REMOTE=git@github.com:fork/dotfiles.git bash bootstrap`. After setup, switch the remote to SSH with `dot remote set-url origin git@github.com:tyarnell/dotfiles.git`.
 
 The bootstrap script:
 

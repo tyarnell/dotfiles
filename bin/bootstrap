@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
 # Bootstrap a fresh macOS box: brew + Brewfile, rustup, go bins, nushell as login shell.
-# Usage:  bash ~/bin/bootstrap
-#         DOTFILES_REMOTE=git@github.com:you/dotfiles.git bash ~/bin/bootstrap   # also clones dotfiles
+# Usage:  bash bootstrap                                   # clones default DOTFILES_REMOTE
+#         DOTFILES_REMOTE=git@github.com:fork/dotfiles.git bash bootstrap   # override
 
 set -euo pipefail
 
+# Default origin — override via env var when forking
+: "${DOTFILES_REMOTE:=https://github.com/tyarnell/dotfiles.git}"
+BREWFILE="$HOME/.config/dotfiles/Brewfile"
+
 log() { printf '\n\033[1;34m>> %s\033[0m\n' "$*"; }
+die() { printf '\n\033[1;31m!! %s\033[0m\n' "$*" >&2; exit 1; }
 
 # ── Xcode CLT ────────────────────────────────────────────────────────────────
 if ! xcode-select -p >/dev/null 2>&1; then
@@ -22,7 +27,7 @@ fi
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
 # ── Dotfiles (bare repo) ─────────────────────────────────────────────────────
-if [[ -n "${DOTFILES_REMOTE:-}" && ! -d "$HOME/.dotfiles" ]]; then
+if [[ ! -d "$HOME/.dotfiles" ]]; then
   log "Cloning dotfiles from $DOTFILES_REMOTE"
   git clone --bare "$DOTFILES_REMOTE" "$HOME/.dotfiles"
   git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" checkout
@@ -44,8 +49,9 @@ if [[ "$(uname -s)" == "Darwin" && -d "$HOME/.config/nushell" ]]; then
 fi
 
 # ── Brewfile ─────────────────────────────────────────────────────────────────
+[[ -f "$BREWFILE" ]] || die "Brewfile not found at $BREWFILE — did the dotfiles checkout run?"
 log "Installing Brew packages"
-brew bundle install --file="$HOME/.config/dotfiles/Brewfile"
+brew bundle install --file="$BREWFILE"
 
 # ── Rust ─────────────────────────────────────────────────────────────────────
 if ! command -v rustup >/dev/null 2>&1; then
