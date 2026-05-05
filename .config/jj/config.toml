@@ -1,0 +1,4 @@
+[ui]
+default-command = "log"
+diff-formatter = ":git"
+pager = ["delta", "--syntax-theme", "Catppuccin Mocha"]
