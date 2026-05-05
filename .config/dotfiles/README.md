@@ -9,7 +9,7 @@ Personal config tracked as a [bare git repo](https://www.atlassian.com/git/tutor
 | `.config/nushell/{env,config}.nu` | shell config |
 | `.config/helix/{config,languages,external-snippets}.toml` | editor + LSP wiring |
 | `.config/helix/snippets/` | hand-curated snippets |
-| `.config/jj/config.toml` | jujutsu identity + UI |
+| `.config/jj/config.toml` | jujutsu UI prefs (identity is set per-repo, see below) |
 | `.config/dotfiles/Brewfile` | brew formulae + casks |
 | `.config/dotfiles/README.md` | this file |
 | `bin/bootstrap` | one-shot installer for a new Mac |
@@ -42,6 +42,17 @@ The bootstrap script:
 5. Installs rustup + `simple-completion-language-server`
 6. Installs Go LSPs/tools: `gopls`, `dlv`, `goimports`, `gotests`, `staticcheck`
 7. Adds `nu` to `/etc/shells` (run `chsh -s $(which nu)` to switch login shell)
+
+## Per-repo identity (jj)
+
+Identity is intentionally **not** in the tracked jj config — different machines/repos may use different names. Set it per-repo on first checkout:
+
+```bash
+jj config set --repo user.name  "your name"
+jj config set --repo user.email "you@example.com"
+```
+
+Lands in `.jj/repo/config.toml` inside the repo (jj-ignored, never pushed).
 
 ## Bare repo, briefly
 
