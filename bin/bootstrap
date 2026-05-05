@@ -30,6 +30,12 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 if [[ ! -d "$HOME/.dotfiles" ]]; then
   log "Cloning dotfiles from $DOTFILES_REMOTE"
   git clone --bare "$DOTFILES_REMOTE" "$HOME/.dotfiles"
+fi
+
+# Ensure tracked files are checked out into $HOME. Idempotent on a clean tree;
+# self-heals if a previous bootstrap run cloned but failed before checkout.
+if [[ ! -f "$BREWFILE" ]]; then
+  log "Checking out tracked files into \$HOME"
   git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" checkout
   git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" config status.showUntrackedFiles no
 fi
