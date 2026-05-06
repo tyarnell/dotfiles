@@ -32,11 +32,13 @@ if [[ ! -d "$HOME/.dotfiles" ]]; then
   git clone --bare "$DOTFILES_REMOTE" "$HOME/.dotfiles"
 fi
 
-# Ensure tracked files are checked out into $HOME. Idempotent on a clean tree;
-# self-heals if a previous bootstrap run cloned but failed before checkout.
+# Ensure tracked files are checked out into $HOME. `reset --hard HEAD` forces
+# work tree + index to match HEAD — self-heals from any partial-checkout state
+# (empty index, conflicting pre-existing files, half-applied checkout).
+# Only runs when Brewfile is absent so it never clobbers post-bootstrap edits.
 if [[ ! -f "$BREWFILE" ]]; then
   log "Checking out tracked files into \$HOME"
-  git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" checkout
+  git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" reset --hard HEAD
   git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" config status.showUntrackedFiles no
 fi
 
